@@ -2,7 +2,9 @@ import { validateExpense, validateExpenseQueryStr } from "../utils/validateExpen
 import XLSX from 'xlsx'
 import path from 'path'
 import Expense from "../Models/Expense.js";
+import env from 'dotenv'
 
+env.config()
 
 export const getAllUserExpenses = async (req, res) => {
     try {
@@ -39,7 +41,7 @@ export const getAllUserExpenses = async (req, res) => {
 
         const totalAmountOfExpenses = expenseResult.reduce((total, expense) => expense.amount + total, 0);
 
-        const numberOfExpenses = await Expense.countDocuments(filter);
+        const numberOfExpenses = expenseResult.length
 
         const totalPages = Math.ceil(numberOfExpenses / expensePerPage);
         //handle if the page is greater than the total pages
@@ -57,6 +59,7 @@ export const getAllUserExpenses = async (req, res) => {
     }
 
 }
+
 export const CreateNewExpense = async (req, res) => {
     try {
         const { id: userId } = req.user
@@ -73,6 +76,7 @@ export const CreateNewExpense = async (req, res) => {
     }
 
 }
+
 export const getExpenseById = async (req, res) => {
     try {
         const { id: expenseId } = req.params;
@@ -90,9 +94,12 @@ export const getExpenseById = async (req, res) => {
         res.status(500).json({ success: false, message: `Internal server error: ${error.message}` })
     }
 }
+
 export const updateExpenseById = async (req, res) => {
     try {
         const { id: expenseId } = req.params;
+        if (!expense) return res.status(404).json({ success: false, message: "Expense not found" })
+
         const { id: userId } = req.user;
         const { title, amount, isRecurring, category, notes, currency, tags } = req.body;
         //Validate inputs 
@@ -112,9 +119,9 @@ export const updateExpenseById = async (req, res) => {
 
 
 }
+
 export const deleteExpenseById = async (req, res) => {
     try {
-        const { id: userId } = req.user
         const { id: expenseId } = req.params;
         //if the user didn't pass the expenseId in the params
         if (!expenseId) return res.status(400).json({ success: false, message: "Expense ID is required" })
@@ -130,16 +137,16 @@ export const deleteExpenseById = async (req, res) => {
     }
 
 }
+
 export const getRecurringExpenses = async (req, res) => {
     try {
         const { id: userId } = req.user;
         const recurringExpenses = await Expense.find({ userId, isRecurring: true })
-        const numberOfRecurringExpenses = await Expense.countDocuments({ userId, isRecurring: true });
         const totalRecurringExpenses = recurringExpenses.reduce((total, expense) => total + expense.amount, 0);
         console.log({ userId })
         return res.status(200).json({
             success: true,
-            number: numberOfRecurringExpenses,
+            number: recurringExpenses.length,
             totalRecurringExpenses,
             recurringExpenses
         })
@@ -147,12 +154,12 @@ export const getRecurringExpenses = async (req, res) => {
         res.status(500).json({ success: false, message: `Internal server error: ${error.message}` })
     }
 }
+
 export const downloadExpensesSheet = async (req, res) => {
     try {
         const { id: userId } = req.user;
         const allUserExpenses = await Expense.find({ userId });
-        //create the table structure to the excel sheet
-        XLSX.worksheet = XLSX.utils.json_to_sheet(allUserExpenses.map(expense => ({
+        const sheetData = allUserExpenses.map(expense => ({
             Title: expense.title,
             Amount: expense.amount,
             IsRecurring: expense.isRecurring,
@@ -161,7 +168,9 @@ export const downloadExpensesSheet = async (req, res) => {
             Currency: expense.currency,
             Tags: expense.tags.join(', '),
             CreatedAt: expense.createdAt.toISOString(),
-        })));
+        }))
+        //create the table structure to the excel sheet
+        XLSX.worksheet = XLSX.utils.json_to_sheet(sheetData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, XLSX.worksheet, 'Expenses');
 
@@ -180,5 +189,29 @@ export const downloadExpensesSheet = async (req, res) => {
 
 }
 
+export const searchExpenses = async (req, res) => {
+    try {
+        const { id: userId } = req.user;
+        const { q } = req.query;
+        if (!q) return res.status(400).json({ success: false, message: `the query parameter is require for searching` })
+
+        const expensesResults = await Expense.find(
+            {
+                userId,
+                $or: [
+                    { title: { $regex: q, $options: 'i' } },
+                    { notes: { $regex: q, $options: 'i' } },
+                    { category: { $regex: q, $options: 'i' } },
+                    { tags: { $regex: q, $options: 'i' } },
+                ],
+            }
+
+        )
+        if (expensesResults.length === 0) return res.status(404).json({ success: false, message: `your search term "${q}" doesn't exist in the expenses` })
+        return res.status(200).json({ success: true, numberOfResults: expensesResults.length, results: expensesResults })
+    } catch (error) {
+        res.status(500).json({ success: false, message: `Internal server error: ${error.message}` })
+    }
 
 
+}

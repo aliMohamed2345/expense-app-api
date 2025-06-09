@@ -62,3 +62,29 @@ export const validateExpenseQueryStr = (page, limit, currency, category, sort) =
     }
     return { isValid: true, message: "" }
 }
+export const validateUsersQueryStr = (page, limit, sort, role) => {
+    const validSortOptions = ['asc', 'desc', 'ascending', 'descending', '1', '-1'];
+    const validRole = ['admin', 'user'];
+
+    //page
+    if (page) {
+        if (page < 0) return { isValid: false, message: "the page must be greater than or equal to 0" }
+        if (isNaN(page)) return { isValid: false, message: "the page must be a number" }
+    }
+
+    //limit 
+    if (limit) {
+        if (limit < 1 || limit > 20) return { isValid: false, message: "the limit must be between 1 and 20 " }
+        if (isNaN(limit)) return { isValid: false, message: "the limit must be a number" }
+    }
+
+    //sort 
+    if (sort && !validSortOptions.includes(sort.toLowerCase())) {
+        return { isValid: false, message: `the sort must be one of the following : ${validSortOptions.join(", ")}` }
+    }
+    //role 
+    if (role) {
+        if (!validRole.includes(role)) return { isValid: false, message: `the role must be one of the following : ${validRole.join(", ")}` }
+    }
+    return { isValid: true, message: '' }
+}

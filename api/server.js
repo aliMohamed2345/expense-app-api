@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 //Routes
 import authRoutes from '../Routes/auth.route.js';
 import expenseRoutes from '../Routes/expense.route.js';
+import adminRoutes from '../Routes/admin.route.js'
 //db
 import connectToDB from '../db.js'
 env.config()
@@ -38,7 +39,7 @@ connectToDB()
 
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/expenses', expenseRoutes)
-
+app.use('/api/v1/admin', adminRoutes)
 
 app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`) })
 

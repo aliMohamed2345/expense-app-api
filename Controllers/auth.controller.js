@@ -1,9 +1,7 @@
 import User from "../Models/User.js";
-import env from 'dotenv'
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validateLogInCredentials, validateSignUpCredentials } from "../utils/validateUserCredentials.js";
-env.config()
 
 
 export const logIn = async (req, res) => {
@@ -45,6 +43,7 @@ export const logIn = async (req, res) => {
     }
 
 }
+
 export const signUp = async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -85,6 +84,7 @@ export const signUp = async (req, res) => {
     }
 
 }
+
 export const getProfile = async (req, res) => {
     try {
         const { id: userId } = req.user;
@@ -99,6 +99,7 @@ export const getProfile = async (req, res) => {
         return res.status(500).json({ success: false, message: `Internal server error: ${error.message}` })
     }
 }
+
 export const logOut = async (req, res) => {
     try {
         res.clearCookie('token', {
@@ -111,4 +112,5 @@ export const logOut = async (req, res) => {
         return res.status(500).json({ success: false, message: `Internal server error: ${error.message}` })
     }
 }
+
 

@@ -7,7 +7,8 @@ import {
     downloadExpensesSheet,
     getExpenseById,
     getRecurringExpenses,
-    updateExpenseById
+    updateExpenseById,
+    searchExpenses
 } from '../Controllers/expense.controller.js'
 import { verifyToken } from '../Middlewares/verifyToken.js';
 const router = express.Router();
@@ -17,6 +18,8 @@ router.route('/').get(verifyToken, getAllUserExpenses).post(verifyToken, CreateN
 router.get('/recurring', verifyToken, getRecurringExpenses)
 
 router.get('/download', verifyToken, downloadExpensesSheet);
+
+router.get('/search', verifyToken, searchExpenses)
 
 router.route('/:id').get(verifyToken, getExpenseById).put(verifyToken, updateExpenseById).delete(verifyToken, deleteExpenseById);
 

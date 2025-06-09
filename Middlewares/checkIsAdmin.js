@@ -1,4 +1,4 @@
-const checkIsAdmin = (req, res, next) => {
+export const checkIsAdmin = (req, res, next) => {
     try {
         if (req.user && req?.user?.isAdmin) {
             return next()// User is an admin, proceed to the next middleware or route handler
