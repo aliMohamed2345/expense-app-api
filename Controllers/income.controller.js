@@ -176,7 +176,8 @@ export const downloadIncomesSheet = async (req, res) => {
         XLSX.writeFile(workbook, filePath);
 
         // ✅ Return a URL to the user
-        const fileUrl = `${process.env.CLIENT_URL || `http://localhost:${process.env.PORT || 3000}`}/exports/${filename}`;
+        const fileUrl = `${process.env.NODE_ENV === 'production' ? process.env.API_URL : `http://localhost:${process.env.PORT || 3000}`
+            }/exports/${filename}`;
 
         return res.status(201).json({ success: true, message: 'Excel file generated successfully', fileUrl })
     } catch (error) {
