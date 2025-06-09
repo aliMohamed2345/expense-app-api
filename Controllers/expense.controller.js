@@ -154,40 +154,46 @@ export const getRecurringExpenses = async (req, res) => {
     }
 }
 
+
 export const downloadExpensesSheet = async (req, res) => {
-    try {
-        const { id: userId } = req.user;
-        const allUserExpenses = await Expense.find({ userId });
-        const sheetData = allUserExpenses.map(expense => ({
-            Title: expense.title,
-            Amount: expense.amount,
-            IsRecurring: expense.isRecurring,
-            Category: expense.category,
-            Notes: expense.notes,
-            Currency: expense.currency,
-            Tags: expense.tags.join(', '),
-            CreatedAt: expense.createdAt.toISOString(),
-        }))
-        //create the table structure to the excel sheet
-        XLSX.worksheet = XLSX.utils.json_to_sheet(sheetData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, XLSX.worksheet, 'Expenses');
+  try {
+    const { id: userId } = req.user;
 
-        // ✅ Save to /public/exports with a unique filename
-        const filename = `expenses_${userId}_${Date.now()}.xlsx`;
-        const filePath = path.join("public", "exports", filename);
-        XLSX.writeFile(workbook, filePath);
+    const allUserExpenses = await Expense.find({ userId });
 
-        // ✅ Return a URL to the user
-        const fileUrl = `${process.env.NODE_ENV === 'production' ? process.env.API_URL : `http://localhost:${process.env.PORT || 3000}`
-            }/exports/${filename} `;
+    const sheetData = allUserExpenses.map(expense => ({
+      Title: expense.title,
+      Amount: expense.amount,
+      IsRecurring: expense.isRecurring,
+      Category: expense.category,
+      Notes: expense.notes,
+      Currency: expense.currency,
+      Tags: expense.tags.join(', '),
+      CreatedAt: expense.createdAt.toISOString(),
+    }));
 
-        return res.status(201).json({ success: true, message: 'Excel file generated successfully', fileUrl })
-    } catch (error) {
-        return res.status(500).json({ success: false, message: `Internal server error: ${error.message} ` });
-    }
+    // Create workbook in memory
+    const worksheet = XLSX.utils.json_to_sheet(sheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Expenses');
 
-}
+    // Generate Excel buffer (in memory)
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    // Set headers to download the file
+    res.setHeader('Content-Disposition', `attachment; filename=expenses_${userId}_${Date.now()}.xlsx`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+    // Send the file directly
+    return res.end(buffer);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: `Internal server error: ${error.message}`
+    });
+  }
+};
+
 
 export const searchExpenses = async (req, res) => {
     try {
