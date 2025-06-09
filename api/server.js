@@ -4,6 +4,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import path from 'path'
+import cors from 'cors'
 import { fileURLToPath } from "url";
 //Routes
 import authRoutes from '../Routes/auth.route.js';
@@ -20,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
+const allowedOrigins = [`http://localhost:${PORT}`, `https://expense-app-iota-ivory.vercel.app/`]
 
 //Middlewares
 app.use(helmet())
@@ -28,6 +29,10 @@ app.use(express.json()) // parsing the json data
 app.use(cookieParser())//parsing the cookies 
 app.use("/exports", express.static(path.join(__dirname, "public", "exports")));
 app.use(express.urlencoded({ extended: true })) // parsing the urlencoded data
+
+app.use(cors({
+    origin: allowedOrigins, credentials: true
+}))
 
 app.get("/", (req, res) => {
     try {
