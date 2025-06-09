@@ -3,7 +3,6 @@ import XLSX from 'xlsx'
 import path from 'path'
 import Expense from "../Models/Expense.js";
 import env from 'dotenv'
-
 env.config()
 
 export const getAllUserExpenses = async (req, res) => {
@@ -41,7 +40,7 @@ export const getAllUserExpenses = async (req, res) => {
 
         const totalAmountOfExpenses = expenseResult.reduce((total, expense) => expense.amount + total, 0);
 
-        const numberOfExpenses = expenseResult.length
+        const numberOfExpenses = await Expense.countDocuments(filter);
 
         const totalPages = Math.ceil(numberOfExpenses / expensePerPage);
         //handle if the page is greater than the total pages
@@ -98,7 +97,7 @@ export const getExpenseById = async (req, res) => {
 export const updateExpenseById = async (req, res) => {
     try {
         const { id: expenseId } = req.params;
-        if (!expense) return res.status(404).json({ success: false, message: "Expense not found" })
+        if (!expenseId) return res.status(404).json({ success: false, message: "Expense not found" })
 
         const { id: userId } = req.user;
         const { title, amount, isRecurring, category, notes, currency, tags } = req.body;
@@ -143,7 +142,7 @@ export const getRecurringExpenses = async (req, res) => {
         const { id: userId } = req.user;
         const recurringExpenses = await Expense.find({ userId, isRecurring: true })
         const totalRecurringExpenses = recurringExpenses.reduce((total, expense) => total + expense.amount, 0);
-        console.log({ userId })
+
         return res.status(200).json({
             success: true,
             number: recurringExpenses.length,

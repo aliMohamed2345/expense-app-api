@@ -9,8 +9,10 @@ import { fileURLToPath } from "url";
 import authRoutes from '../Routes/auth.route.js';
 import expenseRoutes from '../Routes/expense.route.js';
 import adminRoutes from '../Routes/admin.route.js'
+import incomeRoutes from '../Routes/income.route.js'
 //db
 import connectToDB from '../db.js'
+import { errorHandler } from '../Middlewares/errorHandler.js';
 env.config()
 
 const app = express();
@@ -38,8 +40,20 @@ app.get("/", (req, res) => {
 connectToDB()
 
 app.use('/api/v1/auth', authRoutes)
-app.use('/api/v1/expenses', expenseRoutes)
 app.use('/api/v1/admin', adminRoutes)
+app.use('/api/v1/expenses', expenseRoutes)
+app.use('/api/v1/incomes', incomeRoutes)
+
+// 404 JSON handler
+app.use((req, res, next) => {
+    res.status(404).json({
+        success: false,
+        message: `Route ${req.originalUrl} not found`,
+    });
+});
+
+//error handler 
+app.use(errorHandler)
 
 app.listen(PORT, () => { console.log(`Server is running on port ${PORT}`) })
 

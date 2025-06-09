@@ -21,6 +21,9 @@ router.get('/download', verifyToken, downloadExpensesSheet);
 
 router.get('/search', verifyToken, searchExpenses)
 
-router.route('/:id').get(verifyToken, getExpenseById).put(verifyToken, updateExpenseById).delete(verifyToken, deleteExpenseById);
+router.route('/:id')
+    .get(verifyToken, getExpenseById)
+    .put(verifyToken, updateExpenseById)
+    .delete(verifyToken, deleteExpenseById);
 
 export default router; 
