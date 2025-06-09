@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const allowedOrigins = [`http://localhost:${PORT}`, `https://expense-app-iota-ivory.vercel.app/`]
+const allowedOrigins = [`http://localhost:${PORT}`, `https://expense-app-api-lemon.vercel.app/`]
 
 //Middlewares
 app.use(helmet())
