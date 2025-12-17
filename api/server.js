@@ -31,11 +31,11 @@ app.use(express.json()) // parsing the json data
 app.use(cookieParser())//parsing the cookies 
 app.use("/exports", express.static(path.join(__dirname, "public", "exports")));
 app.use(express.urlencoded({ extended: true })) // parsing the urlencoded data
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 app.use(cors({
     origin: allowedOrigins, credentials: true
 }))
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 app.get("/", (req, res) => {
     try {

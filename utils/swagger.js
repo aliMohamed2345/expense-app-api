@@ -10,14 +10,7 @@ const options = {
             description: "API documentation for Expense Tracker backend",
         },
         servers: [
-            {
-                url: `http://localhost:${process.env.PORT}`,
-                description: "Local server",
-            },
-            {
-                url: "https://expense-app-api-lemon.vercel.app",
-                description: "Production server",
-            },
+            { url: "/" }
         ],
         components: {
             securitySchemes: {
@@ -30,7 +23,10 @@ const options = {
         },
         security: [{ cookieAuth: [] }],
     },
-    apis: ["./Controllers/*.js", "./Routes/*.js"],
+    apis:[ "./Routes/*.js",
+  "./Controllers/*.js",
+  "./dist/Routes/*.js",
+  "./dist/Controllers/*.js"]
 };
 
 const swaggerSpec = swaggerJsdoc(options);
