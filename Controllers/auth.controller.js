@@ -1,9 +1,40 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication endpoints
+ */
 import User from "../Models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validateLogInCredentials, validateSignUpCredentials } from "../utils/validateUserCredentials.js";
 
-
+/**
+ * @swagger
+ * /api/v1/auth/login:
+ *   post:
+ *     summary: Log in a user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: test@mail.com
+ *               password:
+ *                 type: string
+ *                 example: Password123
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ */
 export const logIn = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -44,6 +75,35 @@ export const logIn = async (req, res) => {
 
 }
 
+/**
+ * @swagger
+ * /api/v1/auth/signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [username, email, password]
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: ali
+ *               email:
+ *                 type: string
+ *                 example: ali@mail.com
+ *               password:
+ *                 type: string
+ *                 example: Password123
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       409:
+ *         description: User already exists
+ */
 export const signUp = async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -85,6 +145,20 @@ export const signUp = async (req, res) => {
 
 }
 
+/**
+ * @swagger
+ * /api/v1/auth/profile:
+ *   get:
+ *     summary: Get logged-in user profile
+ *     tags: [Auth]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved
+ *       401:
+ *         description: Unauthorized
+ */
 export const getProfile = async (req, res) => {
     try {
         const { id: userId } = req.user;
@@ -100,6 +174,16 @@ export const getProfile = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/auth/logout:
+ *   post:
+ *     summary: Log out the user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ */
 export const logOut = async (req, res) => {
     try {
         res.clearCookie('token', {

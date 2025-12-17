@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import path from 'path'
 import cors from 'cors'
 import { fileURLToPath } from "url";
+import { swaggerSpec } from '../utils/swagger.js';
+import { swaggerUi } from '../utils/swagger.js';
 //Routes
 import authRoutes from '../Routes/auth.route.js';
 import expenseRoutes from '../Routes/expense.route.js';
@@ -33,6 +35,7 @@ app.use(express.urlencoded({ extended: true })) // parsing the urlencoded data
 app.use(cors({
     origin: allowedOrigins, credentials: true
 }))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 app.get("/", (req, res) => {
     try {

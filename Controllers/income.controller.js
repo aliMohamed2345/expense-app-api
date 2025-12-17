@@ -1,11 +1,61 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Incomes
+ *   description: User income management endpoints
+ */
 import { validateIncome, validateIncomeQueryStr } from "../utils/validateIncome.js";
 import Income from "../Models/Income.js";
 import env from 'dotenv'
 import Expense from "../Models/Expense.js";
 import XLSX from 'xlsx'
-import path from 'path'
 env.config()
 
+/**
+ * @swagger
+ * /api/v1/incomes:
+ *   get:
+ *     summary: Get all incomes for the logged-in user
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *         example: 10
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *       - in: query
+ *         name: currency
+ *         schema:
+ *           type: string
+ *         example: USD
+ *       - in: query
+ *         name: source
+ *         schema:
+ *           type: string
+ *         example: Salary
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: string
+ *         example: monthly
+ *     responses:
+ *       200:
+ *         description: Incomes fetched successfully
+ *       400:
+ *         description: Invalid query parameters
+ */
 export const getAllUserIncomes = async (req, res) => {
     try {
 
@@ -59,6 +109,48 @@ export const getAllUserIncomes = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/incomes:
+ *   post:
+ *     summary: Create a new income
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, amount, source, currency]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Salary
+ *               amount:
+ *                 type: number
+ *                 example: 5000
+ *               isRecurring:
+ *                 type: boolean
+ *                 example: true
+ *               source:
+ *                 type: string
+ *                 example: Company
+ *               notes:
+ *                 type: string
+ *                 example: Monthly salary
+ *               currency:
+ *                 type: string
+ *                 example: USD
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Income created successfully
+ */
 export const CreateNewIncome = async (req, res) => {
     try {
         const { id: userId } = req.user
@@ -75,6 +167,26 @@ export const CreateNewIncome = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/incomes/{id}:
+ *   get:
+ *     summary: Get income by ID
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Income retrieved successfully
+ *       404:
+ *         description: Income not found
+ */
 export const getIncomeById = async (req, res) => {
     try {
         const { id: incomeId } = req.params;
@@ -93,6 +205,44 @@ export const getIncomeById = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/incomes/{id}:
+ *   put:
+ *     summary: Update income by ID
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *               isRecurring:
+ *                 type: boolean
+ *               source:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *               currency:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Income updated successfully
+ */
 export const updateIncomeById = async (req, res) => {
     try {
         const { id: incomeId } = req.params;
@@ -117,6 +267,22 @@ export const updateIncomeById = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/incomes/{id}:
+ *   delete:
+ *     summary: Delete income by ID
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Income deleted successfully
+ */
 export const deleteIncomeById = async (req, res) => {
     try {
         const { id: incomeId } = req.params;
@@ -134,6 +300,18 @@ export const deleteIncomeById = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/incomes/recurring:
+ *   get:
+ *     summary: Get recurring incomes
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Recurring incomes retrieved
+ */
 export const getRecurringIncomes = async (req, res) => {
     try {
         const { id: userId } = req.user;
@@ -151,6 +329,23 @@ export const getRecurringIncomes = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/incomes/download:
+ *   get:
+ *     summary: Download incomes as Excel file
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Excel file downloaded
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
 export const downloadIncomesSheet = async (req, res) => {
   try {
     const { id: userId } = req.user;
@@ -191,7 +386,27 @@ export const downloadIncomesSheet = async (req, res) => {
   }
 };
 
-
+/**
+ * @swagger
+ * /api/v1/incomes/search:
+ *   get:
+ *     summary: Search incomes by title, notes, source, or tags
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: salary
+ *     responses:
+ *       200:
+ *         description: Search results returned
+ *       404:
+ *         description: No incomes found
+ */
 export const searchIncomes = async (req, res) => {
     try {
         const { id: userId } = req.user;
@@ -217,6 +432,18 @@ export const searchIncomes = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/incomes/balance:
+ *   get:
+ *     summary: Get user balance (total incomes vs total expenses)
+ *     tags: [Incomes]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: User balance calculated successfully
+ */
 export const getUserBalance = async (req, res) => {
     try {
         const { id: userId } = req.user;

@@ -1,8 +1,51 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Admin
+ *   description: Admin management endpoints
+ */
 import User from "../Models/User.js"
 import Expense from "../Models/Expense.js";
 import { validateUpdateData } from "../utils/validateUserCredentials.js"
 import { validateUsersQueryStr } from "../utils/validateExpense.js";
 
+/**
+ * @swagger
+ * /api/v1/admin/users:
+ *   get:
+ *     summary: Get all users with pagination and filters
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *         example: 10
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [admin, user]
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: Users fetched successfully
+ *       400:
+ *         description: Invalid query parameters
+ *       404:
+ *         description: No users found
+ */
 export const getAllUsers = async (req, res) => {
     try {
         const validSortOptions = ['asc', 'desc', 'ascending', 'descending', '1', '-1'];
@@ -33,6 +76,26 @@ export const getAllUsers = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/admin/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully
+ *       404:
+ *         description: User not found
+ */
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -50,6 +113,26 @@ export const getUserById = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/admin/users/{id}:
+ *   delete:
+ *     summary: Delete user by ID
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ */
 export const deleteUserById = async (req, res) => {
 
     try {
@@ -66,6 +149,33 @@ export const deleteUserById = async (req, res) => {
 
 }
 
+/**
+ * @swagger
+ * /api/v1/admin/users/{id}:
+ *   put:
+ *     summary: Update user by ID
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ */
 export const updateUserById = async (req, res) => {
     try {
 
@@ -91,6 +201,18 @@ export const updateUserById = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/admin/stats:
+ *   get:
+ *     summary: Get admin dashboard statistics
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Admin statistics retrieved
+ */
 export const getAdminStats = async (req, res) => {
     try {
         const totalUsers = await User.countDocuments();
@@ -121,6 +243,22 @@ export const getAdminStats = async (req, res) => {
     }
 };
 
+/**
+ * @swagger
+ * /api/v1/admin/users/{id}/role:
+ *   patch:
+ *     summary: Toggle user admin role
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ */
 export const toggleUserRole = async (req, res) => {
     try {
         const { id } = req.params;
@@ -141,6 +279,31 @@ export const toggleUserRole = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/admin/users/search:
+ *   get:
+ *     summary: Search users by username or email
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [admin, user]
+ *     responses:
+ *       200:
+ *         description: Search results returned
+ *       404:
+ *         description: No matching users found
+ */
 export const searchUsers = async (req, res) => {
     try {
         const { role, q } = req.query;

@@ -1,3 +1,9 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Expenses
+ *   description: User expense management endpoints
+ */
 import { validateExpense, validateExpenseQueryStr } from "../utils/validateExpense.js";
 import XLSX from 'xlsx'
 import path from 'path'
@@ -5,6 +11,52 @@ import Expense from "../Models/Expense.js";
 import env from 'dotenv'
 env.config()
 
+
+/**
+ * @swagger
+ * /api/v1/expenses:
+ *   get:
+ *     summary: Get all expenses for the logged-in user
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *         example: 10
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *       - in: query
+ *         name: currency
+ *         schema:
+ *           type: string
+ *         example: USD
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         example: Food
+ *       - in: query
+ *         name: tags
+ *         schema:
+ *           type: string
+ *         example: groceries
+ *     responses:
+ *       200:
+ *         description: Expenses fetched successfully
+ *       400:
+ *         description: Invalid query parameters
+ */
 export const getAllUserExpenses = async (req, res) => {
     try {
 
@@ -59,6 +111,48 @@ export const getAllUserExpenses = async (req, res) => {
 
 }
 
+/**
+ * @swagger
+ * /api/v1/expenses:
+ *   post:
+ *     summary: Create a new expense
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, amount, category, currency]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Lunch
+ *               amount:
+ *                 type: number
+ *                 example: 150
+ *               isRecurring:
+ *                 type: boolean
+ *                 example: false
+ *               category:
+ *                 type: string
+ *                 example: Food
+ *               notes:
+ *                 type: string
+ *                 example: Lunch with friends
+ *               currency:
+ *                 type: string
+ *                 example: USD
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Expense created successfully
+ */
 export const CreateNewExpense = async (req, res) => {
     try {
         const { id: userId } = req.user
@@ -76,6 +170,26 @@ export const CreateNewExpense = async (req, res) => {
 
 }
 
+/**
+ * @swagger
+ * /api/v1/expenses/{id}:
+ *   get:
+ *     summary: Get a specific expense by ID
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Expense retrieved successfully
+ *       404:
+ *         description: Expense not found
+ */
 export const getExpenseById = async (req, res) => {
     try {
         const { id: expenseId } = req.params;
@@ -94,6 +208,45 @@ export const getExpenseById = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /api/v1/expenses/{id}:
+ *   put:
+ *     summary: Update an expense by ID
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *               isRecurring:
+ *                 type: boolean
+ *               category:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *               currency:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Expense updated successfully
+ */
 export const updateExpenseById = async (req, res) => {
     try {
         const { id: expenseId } = req.params;
@@ -119,6 +272,23 @@ export const updateExpenseById = async (req, res) => {
 
 }
 
+/**
+ * @swagger
+ * /api/v1/expenses/{id}:
+ *   delete:
+ *     summary: Delete an expense by ID
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Expense deleted successfully
+ */
+
 export const deleteExpenseById = async (req, res) => {
     try {
         const { id: expenseId } = req.params;
@@ -137,6 +307,18 @@ export const deleteExpenseById = async (req, res) => {
 
 }
 
+/**
+ * @swagger
+ * /api/v1/expenses/recurring:
+ *   get:
+ *     summary: Get all recurring expenses
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Recurring expenses retrieved
+ */
 export const getRecurringExpenses = async (req, res) => {
     try {
         const { id: userId } = req.user;
@@ -155,6 +337,23 @@ export const getRecurringExpenses = async (req, res) => {
 }
 
 
+/**
+ * @swagger
+ * /api/v1/expenses/download:
+ *   get:
+ *     summary: Download expenses as Excel file
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Excel file downloaded
+ *         content:
+ *           application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+ *             schema:
+ *               type: string
+ *               format: binary
+ */
 export const downloadExpensesSheet = async (req, res) => {
   try {
     const { id: userId } = req.user;
@@ -194,7 +393,27 @@ export const downloadExpensesSheet = async (req, res) => {
   }
 };
 
-
+/**
+ * @swagger
+ * /api/v1/expenses/search:
+ *   get:
+ *     summary: Search expenses by title, notes, category, or tags
+ *     tags: [Expenses]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: food
+ *     responses:
+ *       200:
+ *         description: Search results returned
+ *       404:
+ *         description: No expenses found
+ */
 export const searchExpenses = async (req, res) => {
     try {
         const { id: userId } = req.user;
