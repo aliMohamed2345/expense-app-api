@@ -8,6 +8,7 @@ import cors from 'cors'
 import { fileURLToPath } from "url";
 import { swaggerSpec } from '../utils/swagger.js';
 import { swaggerUi } from '../utils/swagger.js';
+import { checkApiKey } from '../Middlewares/checkApiKey.js';
 //Routes
 import authRoutes from '../Routes/auth.route.js';
 import expenseRoutes from '../Routes/expense.route.js';
@@ -23,18 +24,19 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const allowedOrigins = [`http://localhost:${PORT}`, `https://expense-app-api-lemon.vercel.app/`]
-
 //Middlewares
 app.use(helmet())
 app.use(express.json()) // parsing the json data
 app.use(cookieParser())//parsing the cookies 
-app.use("/exports", express.static(path.join(__dirname, "public", "exports")));
 app.use(express.urlencoded({ extended: true })) // parsing the urlencoded data
+app.use("/exports", express.static(path.join(__dirname, "public", "exports")));
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
+app.use(checkApiKey)
+
 app.use(cors({
-    origin: allowedOrigins, credentials: true
+    origin: true, credentials: true
 }))
 
 app.get("/", (req, res) => {
