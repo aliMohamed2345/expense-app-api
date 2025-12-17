@@ -246,7 +246,7 @@ The Postman Collection includes all endpoints:
    - `base_url`: `https://expense-app-api-lemon.vercel.app/api/v1` (production) or `http://localhost:4000/api/v1` (local)
    - Cookies are managed automatically after `/auth/login` or `/auth/signup`.
 3. Test endpoints sequentially, starting with `/auth/signup` or `/auth/login`, then `/expenses`, `/incomes`, or `/admin` routes.
-
+4. you can see the swagger documenation and test from this link :https://expense-app-api-production-d9cd.up.railway.app/api-docs/
 ## Deployment
 
 The API is deployed on Vercel at https://expense-app-api-lemon.vercel.app/. To deploy updates:
